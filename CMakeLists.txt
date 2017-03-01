@@ -22,6 +22,12 @@ target_link_libraries(simple_marker_test
    ${catkin_LIBRARIES}
 )
 
+add_executable(test_marker src/test_marker.cpp)
+target_link_libraries(test_marker
+   ${catkin_LIBRARIES}
+)
+
+
 add_executable(basic_controls_test src/basic_controls_test.cpp)
 target_link_libraries(basic_controls_test
    ${catkin_LIBRARIES}
@@ -68,6 +74,7 @@ install(PROGRAMS
 install(TARGETS
   simple_marker_test
   basic_controls_test
+  test_marker
   #selection
   #pong
   #cube
