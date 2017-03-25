@@ -41,6 +41,7 @@
 
 #include "std_msgs/String.h"
 #include <sstream>
+
 using namespace visualization_msgs;
 
 // %Tag(vars)%
@@ -48,24 +49,19 @@ boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
 // boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server1;
 interactive_markers::MenuHandler menu_handler_finger;
 interactive_markers::MenuHandler menu_handler_mount;
-
 ros::Publisher meshClick_pub;
-
+// interactive_markers::MenuHandler menu_handler_f2;
 // %EndTag(vars)%
+
+// initializing the talker
+
 
 void processFeedback(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
-  std_msgs::String msg;
-
-  std::stringstream mstring;    
-
   std::ostringstream s;
   s << "Feedback from marker '" << feedback->marker_name << "' "
       << " / control '" << feedback->control_name << "'";
-  // mstring << s;
-  msg.data = s.str();
-  meshClick_pub.publish(msg);             
 
   std::ostringstream mouse_point_ss;
   if( feedback->mouse_point_valid )
@@ -74,11 +70,13 @@ void processFeedback(
                    << ", " << feedback->mouse_point.y
                    << ", " << feedback->mouse_point.z
                    << " in frame " << feedback->header.frame_id;
+    meshClick_pub.publish(feedback);             
   }
 
-  ROS_INFO_STREAM( feedback->marker_name << " is now at "
-      << feedback->pose.position.x << ", " << feedback->pose.position.y
-      << ", " << feedback->pose.position.z );
+  // ROS_INFO_STREAM( feedback->marker_name << " is now at "
+  //     << feedback->pose.position.x << ", " << feedback->pose.position.y
+  //     << ", " << feedback->pose.position.z );
+
   if ( feedback-> visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT)
   {
     ROS_INFO_STREAM( s.str() << ": menu item " << feedback->menu_entry_id << " clicked" << mouse_point_ss.str() << "." );
@@ -88,40 +86,48 @@ void processFeedback(
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "test_marker");
-
-  // MARKER THINGS 
-  // ros::init(argc, argv, "meshClickTalker");
+  ros::init(argc, argv, "meshClickTalker");
 
   ros::NodeHandle n;
 
   meshClick_pub = n.advertise<std_msgs::String>("meshClick_chatter", 1000);
+  
+  // ros::Rate loop_rate(10);
 
+  ros::init(argc, argv, "pub_marker");
 
   server.reset( new interactive_markers::InteractiveMarkerServer("basic_controls","",false) );
+  // server1.reset( new interactive_markers::InteractiveMarkerServer("basic_controls","",false) );
 
+  menu_handler_finger.insert( "finger Entry", &processFeedback );
+  menu_handler_mount.insert( "mount Entry", &processFeedback );
+  
   // create an interactive marker server on the topic namespace simple_marker
-  interactive_markers::InteractiveMarkerServer server("test_marker");
+  interactive_markers::InteractiveMarkerServer server("pub_marker");
+  // interactive_markers::InteractiveMarkerServer server("tester_marker");
 
   // create an interactive marker for our server
-  visualization_msgs::InteractiveMarker int_marker;
-  int_marker.header.frame_id = "base_link";
-  int_marker.header.stamp=ros::Time::now();
-  int_marker.name = "finger_marker_test";
-  int_marker.description = "testing button 1";
-
-  // visualization_msgs::InteractiveMarker int_marker_2;
-  // int_marker_2.header.frame_id = "other_link";
-  // int_marker_2.header.stamp=ros::Time::now();
-  // int_marker_2.name = "mount_marker_test";
-  // int_marker_2.description = "testing button 2";
-
+  visualization_msgs::InteractiveMarker finger_int_marker;
+  finger_int_marker.header.frame_id = "base";
+  finger_int_marker.header.stamp=ros::Time::now();
+  finger_int_marker.name = "finger_marker_test";
+  finger_int_marker.description = "Testing_finger_marker";
+  // //tester
+  visualization_msgs::InteractiveMarker int_marker_mount;
+  int_marker_mount.header.frame_id = "mount";
+  int_marker_mount.header.stamp=ros::Time::now();
+  int_marker_mount.name = "mount_menu_test";
+  int_marker_mount.description = "Testing_mount_marker";
 
   //interactive menu control;
-  InteractiveMarkerControl button_control;
-  button_control.interaction_mode = InteractiveMarkerControl::BUTTON;
-  button_control.name = "button_control";
-   
+  InteractiveMarkerControl menu_control;
+  menu_control.interaction_mode = InteractiveMarkerControl::MENU;
+  menu_control.name = "menu_control";
+  
+  InteractiveMarkerControl menu_control_mount;
+  menu_control_mount.interaction_mode = InteractiveMarkerControl::MENU;
+  menu_control_mount.name = "menu_control_mount";
+
 
   // create a grey finger marker
   visualization_msgs::Marker finger;
@@ -136,41 +142,43 @@ int main(int argc, char** argv)
   finger.color.b = 0.5;
   finger.color.a = 1.0;
 
-  // visualization_msgs::Marker mount;
-  // mount.type = visualization_msgs::Marker::MESH_RESOURCE;
-  // mount.mesh_resource = "package://rrbot_description/meshes/mount.stl";
-  // // mount.type = visualization_msgs::Marker::CUBE;
-  // mount.scale.x = .01;
-  // mount.scale.y = .01;
-  // mount.scale.z = .01;
-  // mount.color.r = 0.5;
-  // mount.color.g = 0.5;
-  // mount.color.b = 0.5;
-  // mount.color.a = 1.0;
+    // create a grey mount marker
+  visualization_msgs::Marker mount;
+  mount.type = visualization_msgs::Marker::MESH_RESOURCE;
+  mount.mesh_resource = "package://rrbot_description/meshes/mount.stl";
+  // mount.type = visualization_msgs::Marker::CUBE;
+  mount.scale.x = .01;
+  mount.scale.y = .01;
+  mount.scale.z = .01;
+  mount.color.r = 0.5;
+  mount.color.g = 0.5;
+  mount.color.b = 0.5;
+  mount.color.a = 1.0;
 
-  button_control.markers.push_back(finger);
-  // button_control.markers.push_back(mount);
-  // menu_control.markers.push_back(mount);
-  button_control.always_visible = true;
-  // menu_control.always_visible = true;
 
-  // add the control to the interactive marker
-  // int_marker.controls.push_back( box_control );
-  int_marker.controls.push_back( button_control);
-  // int_marker_2.controls.push_back(button_control);
-  // int_marker.controls.push_back(menu_control);
+  // ADD MARKERS TO CONTROLS 
+  menu_control.markers.push_back(finger);
+  menu_control.always_visible = true;
 
+  menu_control_mount.markers.push_back(mount);
+  menu_control_mount.always_visible = true;
+
+  // ADD CONTROLS TO MARKERS 
+  finger_int_marker.controls.push_back( menu_control);
+  int_marker_mount.controls.push_back(menu_control_mount);
+
+  //add marker to int marker
   // add the interactive marker to our collection &
   // tell the server to call processFeedback() when feedback arrives for it
-  server.insert(int_marker, &processFeedback);
-  server.applyChanges();
-
-  // server.insert(int_marker_2, &processFeedback);
-
+  server.insert(finger_int_marker, &processFeedback);
+  server.insert(int_marker_mount, &processFeedback);
   // 'commit' changes and send to all clients
-  // menu_handler_finger.apply( server, int_marker.name);
-  // menu_handler_mount.apply( server, int_marker.name);
-  // server.applyChanges();
+  menu_handler_finger.apply( server, finger_int_marker.name);
+  server.applyChanges();
+  
+  menu_handler_mount.apply( server, int_marker_mount.name);
+  // menu_handler_f2.apply( server, int_marker.name);
+  server.applyChanges();
 
 
   // start the ROS main loop

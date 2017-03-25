@@ -2,11 +2,38 @@ cmake_minimum_required(VERSION 2.8.3)
 project(rrbot_description)
 
 #find_package(catkin REQUIRED)
-find_package(catkin REQUIRED interactive_markers roscpp visualization_msgs tf)
+find_package(catkin REQUIRED 
+  interactive_markers
+  roscpp 
+  visualization_msgs 
+  tf 
+  message_generation
+  actionlib_msgs
+  std_msgs
+)
+
+##########
+## MSGS ##
+##########
+
+add_message_files(DIRECTORY msg 
+  FILES
+  PartName.msg
+)
+
+add_service_files(DIRECTORY srv 
+  FILES
+  GetPartName.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 #catkin_package()
 catkin_package(
-CATKIN_DEPENDS interactive_markers roscpp visualization_msgs tf
+CATKIN_DEPENDS interactive_markers roscpp visualization_msgs tf message_runtime std_msgs
 )
 
 ###########
@@ -27,11 +54,30 @@ target_link_libraries(test_marker
    ${catkin_LIBRARIES}
 )
 
+add_executable(test2_marker src/test2_marker.cpp)
+target_link_libraries(test2_marker
+   ${catkin_LIBRARIES}
+)
+
+
+## Build talker and listener
+add_executable(publisher src/publisher.cpp)
+target_link_libraries(publisher
+   ${catkin_LIBRARIES}
+)
+add_dependencies(publisher beginner_tutorials_generate_messages_cpp)
+
+
+add_executable(subscriber src/subscriber.cpp)
+target_link_libraries(subscriber ${catkin_LIBRARIES})
+add_dependencies(subscriber beginner_tutorials_generate_messages_cpp)
 
 add_executable(basic_controls_test src/basic_controls_test.cpp)
 target_link_libraries(basic_controls_test
    ${catkin_LIBRARIES}
 )
+
+
 #####
 #add_executable(selection src/selection.cpp)
 #target_link_libraries(selection
@@ -75,6 +121,9 @@ install(TARGETS
   simple_marker_test
   basic_controls_test
   test_marker
+  test2_marker
+  publisher
+  subscriber
   #selection
   #pong
   #cube
@@ -93,6 +142,3 @@ install(DIRECTORY meshes
 
 install(DIRECTORY urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
-
-
-

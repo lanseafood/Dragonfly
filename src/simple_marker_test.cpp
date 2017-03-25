@@ -52,6 +52,7 @@ interactive_markers::MenuHandler menu_handler_mount;
 void processFeedback(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
+  ROS_INFO_STREAM(&feedback);
   std::ostringstream s;
   s << "Feedback from marker '" << feedback->marker_name << "' "
       << " / control '" << feedback->control_name << "'";
@@ -75,31 +76,6 @@ void processFeedback(
   server->applyChanges();
 }
 
-void processFeedback1(
-    const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback, boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server  )
-{
-  std::ostringstream s;
-  s << "Feedback from marker '" << feedback->marker_name << "' "
-      << " / control '" << feedback->control_name << "'";
-
-  std::ostringstream mouse_point_ss;
-  if( feedback->mouse_point_valid )
-  {
-    mouse_point_ss << " at " << feedback->mouse_point.x
-                   << ", " << feedback->mouse_point.y
-                   << ", " << feedback->mouse_point.z
-                   << " in frame " << feedback->header.frame_id;
-  }
-
-  ROS_INFO_STREAM( feedback->marker_name << " is now at "
-      << feedback->pose.position.x << ", " << feedback->pose.position.y
-      << ", " << feedback->pose.position.z );
-  if ( feedback-> visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT)
-  {
-    ROS_INFO_STREAM( s.str() << ": menu item " << feedback->menu_entry_id << " clicked" << mouse_point_ss.str() << "." );
-  }
-  server->applyChanges();
-}
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "simple_marker");
@@ -193,15 +169,15 @@ int main(int argc, char** argv)
 
 
   menu_control.markers.push_back(finger);
-  menu_control.markers.push_back(mount);
+  menu_control_mount.markers.push_back(mount);
   // menu_control.markers.push_back(f2);
   menu_control.always_visible = true;
-  menu_control.always_visible = true;
+  menu_control_mount.always_visible = true;
 
   // add the control to the interactive marker
   // int_marker.controls.push_back( box_control );
   int_marker.controls.push_back( menu_control);
-  int_marker.controls.push_back(menu_control);
+  int_marker.controls.push_back(menu_control_mount);
 
   // // create a control which will move the box
   // // this control does not contain any markers,
@@ -220,6 +196,8 @@ int main(int argc, char** argv)
   // server.insert(int_marker_mount, &processFeedback);
   // 'commit' changes and send to all clients
   menu_handler_finger.apply( server, int_marker.name);
+  server.applyChanges();
+
   menu_handler_mount.apply( server, int_marker.name);
   // menu_handler_f2.apply( server, int_marker.name);
   server.applyChanges();
