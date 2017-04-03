@@ -3,20 +3,20 @@
 # Top level is all the work I have so far about the interactive markers and the 3d model. 
 
 ## Setup:
-clone repo into new repository named 'rrbot_description' (or whatever you would like)
+clone repo into new repository named 'rrbot_description'
 
 in your ROS workspace run '<workspace_name>_make
 
 ## To run the interactive marker alone:
 1. roscore
-2. rosrun rrbot_description simple_marker_test
-3. rosrun rviz rviz
+2. rosrun rrbot_description test_marker
+3. rosrun rrbot_description subscriber
+4. rosrun rviz rviz 
 
 #### add interactive marker component in Rviz
-1. Make sure update topic is simple_marker/update
+1. Make sure update topic is test_finger_marker/update
 ..* (click anywhere on rviz)
-2. Move the box around with arrows
-3. Click on box to see menu display
+2. Click on part(s) to see the messages pop up in subscriber terminal
 
 ## To see 3D model launch:
 1. roscore
