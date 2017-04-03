@@ -88,7 +88,7 @@ void processFeedback(
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "test_marker");
+  ros::init(argc, argv, "test_finger_marker");
 
   // MARKER THINGS 
   // ros::init(argc, argv, "meshClickTalker");
@@ -98,10 +98,10 @@ int main(int argc, char** argv)
   meshClick_pub = n.advertise<std_msgs::String>("meshClick_chatter", 1000);
 
 
-  server.reset( new interactive_markers::InteractiveMarkerServer("basic_controls","",false) );
+  server.reset( new interactive_markers::InteractiveMarkerServer("test_finger_marker_reset","",false) );
 
   // create an interactive marker server on the topic namespace simple_marker
-  interactive_markers::InteractiveMarkerServer server("test_marker");
+  interactive_markers::InteractiveMarkerServer server("test_finger_marker");
 
   // create an interactive marker for our server
   visualization_msgs::InteractiveMarker int_marker;
@@ -110,11 +110,11 @@ int main(int argc, char** argv)
   int_marker.name = "finger_marker_test";
   int_marker.description = "testing button 1";
 
-  // visualization_msgs::InteractiveMarker int_marker_2;
-  // int_marker_2.header.frame_id = "other_link";
-  // int_marker_2.header.stamp=ros::Time::now();
-  // int_marker_2.name = "mount_marker_test";
-  // int_marker_2.description = "testing button 2";
+  visualization_msgs::InteractiveMarker int_marker_2;
+  int_marker_2.header.frame_id = "other_link";
+  int_marker_2.header.stamp=ros::Time::now();
+  int_marker_2.name = "mount_marker_test";
+  int_marker_2.description = "testing button 2";
 
 
   //interactive menu control;
@@ -122,6 +122,10 @@ int main(int argc, char** argv)
   button_control.interaction_mode = InteractiveMarkerControl::BUTTON;
   button_control.name = "button_control";
    
+  InteractiveMarkerControl button_control_2;
+  button_control.interaction_mode = InteractiveMarkerControl::BUTTON;
+  button_control.name = "button_control_2";
+
 
   // create a grey finger marker
   visualization_msgs::Marker finger;
@@ -136,41 +140,41 @@ int main(int argc, char** argv)
   finger.color.b = 0.5;
   finger.color.a = 1.0;
 
-  // visualization_msgs::Marker mount;
-  // mount.type = visualization_msgs::Marker::MESH_RESOURCE;
-  // mount.mesh_resource = "package://rrbot_description/meshes/mount.stl";
-  // // mount.type = visualization_msgs::Marker::CUBE;
-  // mount.scale.x = .01;
-  // mount.scale.y = .01;
-  // mount.scale.z = .01;
-  // mount.color.r = 0.5;
-  // mount.color.g = 0.5;
-  // mount.color.b = 0.5;
-  // mount.color.a = 1.0;
+  visualization_msgs::Marker mount;
+  mount.type = visualization_msgs::Marker::MESH_RESOURCE;
+  mount.mesh_resource = "package://rrbot_description/meshes/mount.stl";
+  // mount.type = visualization_msgs::Marker::CUBE;
+  mount.scale.x = .01;
+  mount.scale.y = .01;
+  mount.scale.z = .01;
+  mount.color.r = 0.5;
+  mount.color.g = 0.5;
+  mount.color.b = 0.5;
+  mount.color.a = 1.0;
 
   button_control.markers.push_back(finger);
-  // button_control.markers.push_back(mount);
+  button_control_2.markers.push_back(mount);
   // menu_control.markers.push_back(mount);
   button_control.always_visible = true;
-  // menu_control.always_visible = true;
+  button_control_2.always_visible = true;
 
   // add the control to the interactive marker
   // int_marker.controls.push_back( box_control );
   int_marker.controls.push_back( button_control);
-  // int_marker_2.controls.push_back(button_control);
+  int_marker_2.controls.push_back(button_control_2);
   // int_marker.controls.push_back(menu_control);
 
   // add the interactive marker to our collection &
   // tell the server to call processFeedback() when feedback arrives for it
   server.insert(int_marker, &processFeedback);
-  server.applyChanges();
+  // server.applyChanges();
 
-  // server.insert(int_marker_2, &processFeedback);
+  server.insert(int_marker_2, &processFeedback);
 
   // 'commit' changes and send to all clients
   // menu_handler_finger.apply( server, int_marker.name);
   // menu_handler_mount.apply( server, int_marker.name);
-  // server.applyChanges();
+  server.applyChanges();
 
 
   // start the ROS main loop
