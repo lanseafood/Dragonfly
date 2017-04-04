@@ -1,4 +1,6 @@
 <launch>
+  <arg name="model" default="$(find rrbot_description)/urdf/arm.xacro"/>
+
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rrbot_description)/launch/rrbot.rviz" output="screen"/>
 
   <node pkg="rrbot_description" type="test_marker" name="test_marker" output="screen" />
