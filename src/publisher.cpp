@@ -60,8 +60,8 @@ void processFeedback(
     const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback )
 {
   std::ostringstream s;
-  s << "Feedback from marker '" << feedback->marker_name << "' "
-      << " / control '" << feedback->control_name << "'";
+  s  << feedback->marker_name << "' "
+      << "control '" << feedback->control_name << "'";
 
   std::ostringstream mouse_point_ss;
   if( feedback->mouse_point_valid )
@@ -73,14 +73,6 @@ void processFeedback(
     meshClick_pub.publish(feedback);             
   }
 
-  // ROS_INFO_STREAM( feedback->marker_name << " is now at "
-  //     << feedback->pose.position.x << ", " << feedback->pose.position.y
-  //     << ", " << feedback->pose.position.z );
-
-  if ( feedback-> visualization_msgs::InteractiveMarkerFeedback::MENU_SELECT)
-  {
-    ROS_INFO_STREAM( s.str() << ": menu item " << feedback->menu_entry_id << " clicked" << mouse_point_ss.str() << "." );
-  }
   server->applyChanges();
 }
 

@@ -28,12 +28,9 @@ void processFeedback(
 {
   std_msgs::String msg;
 
-  std::stringstream mstring;    
-
   std::ostringstream s;
   s << "Feedback from marker '" << feedback->marker_name << "' "
       << " / control '" << feedback->control_name << "'";
-  // mstring << s;
   msg.data = s.str();
   meshClick_pub.publish(msg);             
 
