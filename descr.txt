@@ -1,0 +1,10 @@
+Done:
+getMarker(string name)
+-returns pointer to an interactive marker from the server
+  //getting interactive marker if needed example
+  //visualization_msgs::InteractiveMarker *p;
+  //p = server->getMarker(name);
+  
+ <!--for debugging uncomment out this in launch-->
+
+  <!--<node pkg="rrbot_description" type="test_marker" name="test_marker" output="screen" launch-prefix="gdb -ex run --args" />-->
