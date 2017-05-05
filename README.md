@@ -37,9 +37,11 @@ The dragonfly_markers.cpp file runs the interactive marker server and allows for
 ## About the XY_Position.msg
 This message passes through the name of the marker to move, the position to move to, and the orientation to change to. 
 1. geometry_msgs/Point position
+
 position is (x, y, z)
 
 2. geometry_msgs/Quaternion orientation
+
 orientation is (x, y, z, w)
 
 3. string name
