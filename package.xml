@@ -2,17 +2,17 @@
 <package>
   <name>rrbot_description</name>
   <version>0.0.0</version>
-  <description>The rrbot_description package</description>
+  <description>Pakage for interactive markers with clickability, color change, and movement</description>
 
-  <maintainer email="davetcoleman@gmail.com">Dave Coleman</maintainer>
+  <maintainer email="old@gmail.com">NASA Ames</maintainer>
 
   <license>BSD</license>
 
   <url type="website">http://http://gazebosim.org/w/index.php?title=Tutorials/1.9/Using_A_URDF_In_Gazebo</url>
   <url type="bugtracker">https://github.com/osrf/gazebo_ros_demos/issues</url>
-  <url type="repository">https://github.com/osrf/gazebo_ros_demos</url>
+  <url type="repository">https://github.com/lanseafood/dragonfly</url>
 
-  <author email="davetcoleman@gmail.com">Dave Coleman</author>
+  <author email="lmao.ftwin@gmail.com">Lanssie Minguye Ma</author>
 
   <buildtool_depend>catkin</buildtool_depend>
 
@@ -21,7 +21,7 @@
   <build_depend>interactive_markers</build_depend>
   <build_depend>visualization_msgs</build_depend>
   <build_depend>tf</build_depend>
-
+  <build_depend>geometry_msgs</build_depend>
   <!-- lanssies for sub and pub -->
   <build_depend>message_generation</build_depend>
 
@@ -41,7 +41,7 @@
   <run_depend>interactive_markers</run_depend>
   <run_depend>visualization_msgs</run_depend>
   <run_depend>tf</run_depend>
-
+  <run_depend>geometry_msgs</run_depend>
 <!-- turtle arm -->
   <run_depend>urdf</run_depend>
   <run_depend>xacro</run_depend>

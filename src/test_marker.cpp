@@ -12,8 +12,12 @@
 #include "std_msgs/String.h"
 #include <sstream>
 #include <string>
+#include "std_msgs/Int64.h"
+#include "rrbot_description/XY_position.h"
+#include <tr1/tuple>
 
 using namespace visualization_msgs;
+
 ros::Publisher meshClick_pub;
 
 boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
@@ -21,12 +25,11 @@ boost::shared_ptr<interactive_markers::InteractiveMarkerServer> server;
 std::map<std::string, std::pair<int, std::string> > markers_color_map;
 
 // Function to insert a marker with a specific name
-const visualization_msgs::InteractiveMarker MakeMarker(std::string const& name, tf::Vector3& position, float color, std::string stl, std::string des) {
+const visualization_msgs::InteractiveMarker MakeMarker(std::string const& name, float color, std::string stl, std::string des) {
   // Create the interactive marker
   visualization_msgs::InteractiveMarker int_marker;
   int_marker.header.frame_id = "base_link";
   int_marker.header.stamp = ros::Time::now();
-  tf::pointTFToMsg(position, int_marker.pose.position);
   int_marker.name = name;
   int_marker.description = des;
   // int_marker.pose.position.x = x;
@@ -59,21 +62,16 @@ const visualization_msgs::InteractiveMarker MakeMarker(std::string const& name, 
   return int_marker;
 }
 
-// Function to insert a marker with a specific name
-void updateMarker(visualization_msgs::InteractiveMarker int_marker) {
-  server->insert(int_marker);
-} 
-
 // Clickable for markers
 void onClick(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback) {
 
   std::cout << *feedback << std::endl;
-  std::cout << feedback->pose.position << std::endl;
-  std::cout << typeid(feedback->pose.position).name() << std::endl;
+  //std::cout << feedback->pose.position << std::endl;
+  //std::cout << typeid(feedback->pose.position).name() << std::endl;
 
   //getting marker name
   std::string name = feedback->marker_name;
-  std::cout << "name of marker " << name << std::endl;
+
   //outputting to cout
   ROS_INFO_STREAM("CONTROLLER " + name + " CLICKED ");
 
@@ -107,46 +105,84 @@ void onClick(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedba
     markers_color_map[name].first = 0;
   }
 
-  //geting new position
-  //tf::Vector3 position = feedback->pose.position;
-  tf::Vector3 position = tf::Vector3(0,0,0);
+
   //getting stl
   std::string stl = markers_color_map[name].second;
-  std::cout << name << position << color << stl << std::endl;
+  std::cout << name << color << stl << std::endl;
   //replacing IM
-  visualization_msgs::InteractiveMarker int_marker = MakeMarker(name, position, color, stl, d);
+  visualization_msgs::InteractiveMarker int_marker = MakeMarker(name, color, stl, d);
+  
+  server->insert(int_marker);
 
-  updateMarker(int_marker);
 
   server->applyChanges();
 
 }
+//aligning the marker to position
+void alignMarker(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback  )
+{
+  //geting new position
+  geometry_msgs::Pose pose = feedback->pose;
 
+  pose.position.x = round(pose.position.x-0.5)+0.5;
+  pose.position.y = round(pose.position.y-0.5)+0.5;
+
+  server->setPose(feedback->marker_name, pose);
+
+  server->applyChanges();
+}
+
+//update Pose given data points
+//msg is formate of Point (position), Quarternion (orientation), and Name (of marker to move)
+void poseCallback(const rrbot_description::XY_position::ConstPtr& msg)
+{
+  //Create pose object
+  geometry_msgs::Pose pose;
+
+  //set Pose position from msg
+  pose.position = msg->position;
+  
+  //round pose positions to look nicer
+  pose.position.x = round(pose.position.x-0.5)+0.5;
+  pose.position.y = round(pose.position.y-0.5)+0.5;
+
+  //set Pose orientation from msg
+  pose.orientation = msg->orientation;
+
+  server->setPose(msg->name, pose);
+
+  server->applyChanges();
+}
 
 int main(int argc, char** argv) {
   // Initialize ROS
   ros::init(argc, argv, "clickable_markers_server");
+
+  //initialize node and subscriber
+  ros::NodeHandle pose_node;
+  ros::Subscriber pose_sub = pose_node.subscribe("fakePoses_chatter", 1000, poseCallback);
+
   // create an interactive marker server on the topic namespace simple_marker
   ros::NodeHandle n;
   server = boost::shared_ptr<interactive_markers::InteractiveMarkerServer>(new interactive_markers::InteractiveMarkerServer ("IM_example_marker"));
   
   meshClick_pub = n.advertise<std_msgs::String>("meshClick_chatter", 1000);
 
-  //get positions
-  tf::Vector3 position_finger = tf::Vector3(0, 0, 0);
-  tf::Vector3 position_mount = tf::Vector3(0, 0, 0);
-  
   //make pairs
   std::pair<int, std::string> finger_pair (0,"package://rrbot_description/meshes/finger.stl");
   std::pair<int, std::string> mount_pair (0,"package://rrbot_description/meshes/mount.stl");
 
   //make markers for each part
-  visualization_msgs::InteractiveMarker int_marker_1 = MakeMarker("marker_finger", position_finger, 0.5, finger_pair.second, "");
-  visualization_msgs::InteractiveMarker int_marker_2 = MakeMarker("marker_mount", position_mount, 0.5, mount_pair.second, "");
+  visualization_msgs::InteractiveMarker int_marker_1 = MakeMarker("marker_finger" , 0.5, finger_pair.second, "");
+  visualization_msgs::InteractiveMarker int_marker_2 = MakeMarker("marker_mount", 0.5, mount_pair.second, "");
 
     // Use two different controller types
   server->insert(int_marker_1, &onClick);
   server->insert(int_marker_2, &onClick);
+
+  //for aligning the marker 
+  // server->setCallback(int_marker_1.name, &alignMarker, visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE );
+  // server->setCallback(int_marker_2.name, &alignMarker, visualization_msgs::InteractiveMarkerFeedback::POSE_UPDATE );
 
   //update Map
   markers_color_map["marker_finger"] =  finger_pair;
@@ -155,9 +191,6 @@ int main(int argc, char** argv) {
   // 'commit' changes and send to all clients
   server->applyChanges();
 
-  //std::cout<< server.marker_contexts_;
-
   // start the ROS main loop
-  // std::cout << "hi";
   ros::spin();
 }

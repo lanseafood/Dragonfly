@@ -4,12 +4,13 @@ project(rrbot_description)
 #find_package(catkin REQUIRED)
 find_package(catkin REQUIRED 
   interactive_markers
+  message_generation
   roscpp 
   visualization_msgs 
   tf 
-  message_generation
   actionlib_msgs
   std_msgs
+  geometry_msgs
 )
 
 ##########
@@ -18,7 +19,7 @@ find_package(catkin REQUIRED
 
 add_message_files(DIRECTORY msg 
   FILES
-  PartName.msg
+  XY_position.msg
 )
 
 add_service_files(DIRECTORY srv 
@@ -29,11 +30,12 @@ add_service_files(DIRECTORY srv
 generate_messages(
   DEPENDENCIES
   std_msgs
+  geometry_msgs
 )
 
 #catkin_package()
 catkin_package(
-CATKIN_DEPENDS interactive_markers roscpp visualization_msgs tf message_runtime std_msgs
+CATKIN_DEPENDS message_runtime interactive_markers roscpp visualization_msgs tf std_msgs geometry_msgs 
 )
 
 ###########
@@ -65,12 +67,16 @@ add_executable(publisher src/publisher.cpp)
 target_link_libraries(publisher
    ${catkin_LIBRARIES}
 )
-add_dependencies(publisher beginner_tutorials_generate_messages_cpp)
 
+add_dependencies(publisher beginner_tutorials_generate_messages_cpp)
 
 add_executable(subscriber src/subscriber.cpp)
 target_link_libraries(subscriber ${catkin_LIBRARIES})
 add_dependencies(subscriber beginner_tutorials_generate_messages_cpp)
+
+add_executable(pose_sub src/pose_sub.cpp)
+target_link_libraries(pose_sub ${catkin_LIBRARIES})
+add_dependencies(pose_sub beginner_tutorials_generate_messages_cpp)
 
 add_executable(basic_controls_test src/basic_controls_test.cpp)
 target_link_libraries(basic_controls_test
@@ -113,6 +119,7 @@ install(PROGRAMS
   #scripts/cube.py
   #scripts/menu.py
   scripts/simple_marker_test.py
+  scripts/pos_pub.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -124,6 +131,7 @@ install(TARGETS
   test2_marker
   publisher
   subscriber
+  pose_sub
   #selection
   #pong
   #cube

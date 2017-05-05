@@ -1,14 +1,13 @@
 #include "ros/ros.h"
-#include "std_msgs/String.h"
 #include "std_msgs/Int64.h"
 /**
  * This tutorial demonstrates simple receipt of messages over the ROS system.
  */
-void chatterCallback(const std_msgs::String::ConstPtr& msg)
-{
-  ROS_INFO("I was clicked and my name is : [%s]", msg->data.c_str());
-}
 
+void poseCallback(const std_msgs::Int64::ConstPtr& msg)
+{
+ ROS_INFO("My pose was this position:", msg->data);
+}
 int main(int argc, char **argv)
 {
   /**
@@ -21,14 +20,14 @@ int main(int argc, char **argv)
    * You must call one of the versions of ros::init() before using any other
    * part of the ROS system.
    */
-  ros::init(argc, argv, "listener");
+  ros::init(argc, argv, "listener1");
 
   /**
    * NodeHandle is the main access point to communications with the ROS system.
    * The first NodeHandle constructed will fully initialize this node, and the last
    * NodeHandle destructed will close down the node.
    */
-  ros::NodeHandle n;
+  ros::NodeHandle pose_node;
   /**
    * The subscribe() call is how you tell ROS that you want to receive messages
    * on a given topic.  This invokes a call to the ROS
@@ -44,8 +43,7 @@ int main(int argc, char **argv)
    * is the number of messages that will be buffered up before beginning to throw
    * away the oldest ones.
    */
-  ros::Subscriber sub = n.subscribe("meshClick_chatter", 1000, chatterCallback);
-
+  ros::Subscriber pose_sub = pose_node.subscribe("fakePoses_chatter", 1000, poseCallback);
   /**
    * ros::spin() will enter a loop, pumping callbacks.  With this version, all
    * callbacks will be called from within this thread (the main one).  ros::spin()
