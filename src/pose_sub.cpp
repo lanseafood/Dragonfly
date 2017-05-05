@@ -1,12 +1,15 @@
 #include "ros/ros.h"
-#include "std_msgs/Int64.h"
+#include "rrbot_description/XY_position.h"
+
 /**
- * This tutorial demonstrates simple receipt of messages over the ROS system.
+ * This listener listens for the Poses that the pose publisher sends out.
  */
 
-void poseCallback(const std_msgs::Int64::ConstPtr& msg)
+void poseCallback(const rrbot_description::XY_position::ConstPtr& msg)
 {
- ROS_INFO("My pose was this position:", msg->data);
+ ROS_INFO("My name is: ", msg->name);
+ ROS_INFO("My pose is this: ", msg->position);
+ ROS_INFO("My orientation is this: ", msg->orientation);
 }
 int main(int argc, char **argv)
 {

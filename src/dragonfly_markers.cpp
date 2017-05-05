@@ -1,3 +1,5 @@
+// this file runs the interactive marker server with 2 examples of interactive markers that are clickable, change color, and move given Poses. 
+
 #include <ros/ros.h>
 
 #include "../../../interactive_markers/include/interactive_markers/interactive_marker_server.h"
