@@ -65,10 +65,6 @@ const visualization_msgs::InteractiveMarker MakeMarker(std::string const& name, 
 // Clickable for markers
 void onClick(const visualization_msgs::InteractiveMarkerFeedbackConstPtr &feedback) {
 
-  std::cout << *feedback << std::endl;
-  //std::cout << feedback->pose.position << std::endl;
-  //std::cout << typeid(feedback->pose.position).name() << std::endl;
-
   //getting marker name
   std::string name = feedback->marker_name;
 
